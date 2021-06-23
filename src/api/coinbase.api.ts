@@ -3,7 +3,7 @@ import {
   COINBASE_API_KEY,
   COINBASE_API_SECRET,
   COINBASE_API_VERSION,
-} from "./env";
+} from "../env";
 import * as crypto from "crypto";
 
 export function coinbaseRequest(

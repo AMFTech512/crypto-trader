@@ -1,0 +1,8 @@
+{
+  "type": "sqlite",
+  "database": "crypto_trader.db",
+  "entities": ["dist/**/*.entity.js"],
+  "cli": {
+    "entitiesDir": "src/db/entities"
+  }
+}
