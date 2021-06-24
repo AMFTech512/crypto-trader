@@ -6,9 +6,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "exec": "node dist",
-    "exec:bg": "node dist &> output.log",
     "start": "npm run clean && npm run build && npm run exec",
-    "start:bg": "npm run clean && npm run build && npm run exec:bg",
     "build": "tsc",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "syncdb": "npm run typeorm schema:sync",
