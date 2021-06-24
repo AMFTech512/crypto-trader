@@ -1,38 +1,39 @@
-import axios from "axios";
-import { getRepository } from "typeorm";
-import { coinbaseRequest } from "./api/coinbase.api";
+import { getConnection } from "typeorm";
 import { initDB } from "./db";
-import {
-  TickerInstance,
-  TickerPriceInstance,
-} from "./entities/price-history.entity";
-import { COINBASE_API_KEY, COINBASE_API_VERSION } from "./env";
+import { TickerFetcher } from "./ticker-fetcher";
+import { USDTickers } from "./tickers/usd-tickers";
 
 console.log("Starting Crypto trader...");
-console.log("Using Coinbase API version", COINBASE_API_VERSION);
 
 async function init() {
   await initDB();
 
-  const tickerRepo = getRepository(TickerInstance);
+  const tickerFetcher = new TickerFetcher({
+    tickers: [
+      USDTickers.Ethereum,
+      USDTickers.EthereumClassic,
+      USDTickers.Bitcoin,
+      USDTickers.Dogecoin,
+      USDTickers.Litecoin,
+    ],
+    interval: 2000,
+    retryCount: 10,
+  });
 
-  const ticker = new TickerInstance();
+  const onTerminate = async (signal: string) => {
+    console.log(`Received ${signal}; terminating program...`);
 
-  ticker.ticker = "ETHUSD";
+    await tickerFetcher.stop();
 
-  ticker.ask = new TickerPriceInstance();
-  ticker.ask.lot_volume = 1.1;
-  ticker.ask.whole_lot_volume = 1;
-  ticker.ask.price = 10;
+    const dbConnection = getConnection();
+    dbConnection.close();
+    console.log("Database connection closed.");
+  };
 
-  await tickerRepo.save(ticker);
+  process.on("SIGINT", onTerminate);
+  process.on("SIGTERM", onTerminate);
 
-  // try {
-  //   const res = await coinbaseRequest("GET", "/v2/prices/BTC-USD/buy");
-  //   console.log(res.data);
-  // } catch (error) {
-  //   console.error(error.response.data);
-  // }
+  tickerFetcher.start();
 }
 
 init().catch((error) => {
