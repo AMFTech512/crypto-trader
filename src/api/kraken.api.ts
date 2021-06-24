@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import {
   TickerRecord,
   TickerAskRecord,
@@ -66,15 +66,19 @@ export async function getTicker(ticker: string) {
     };
   }
 
-  const axiosResult = await axios.get<KrakenGetTickerResponse>(
-    "/public/Ticker",
-    {
+  let axiosResult: AxiosResponse<KrakenGetTickerResponse>;
+
+  try {
+    axiosResult = await axios.get("/public/Ticker", {
       baseURL,
       params: {
         pair: ticker,
       },
-    }
-  );
+    });
+  } catch (error) {
+    if (error.isAxiosError) throw error.toJSON();
+    throw error;
+  }
 
   const data = axiosResult.data;
   const [newKey] = Object.keys(data.result);
