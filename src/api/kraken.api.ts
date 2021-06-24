@@ -10,6 +10,7 @@ import {
   TickerLowRecord,
   TickerHighRecord,
 } from "../entities/ticker-history.entity";
+import { axiosRequest } from "../helpers/axios-request";
 
 const baseURL = "https://api.kraken.com/0/";
 
@@ -66,19 +67,16 @@ export async function getTicker(ticker: string) {
     };
   }
 
-  let axiosResult: AxiosResponse<KrakenGetTickerResponse>;
-
-  try {
-    axiosResult = await axios.get("/public/Ticker", {
+  const [axiosResult, error] = await axiosRequest<KrakenGetTickerResponse>(
+    axios.get("/public/Ticker", {
       baseURL,
       params: {
         pair: ticker,
       },
-    });
-  } catch (error) {
-    if (error.isAxiosError) throw error.toJSON();
-    throw error;
-  }
+    })
+  );
+
+  if (error) throw JSON.stringify(error);
 
   const data = axiosResult.data;
   const [newKey] = Object.keys(data.result);

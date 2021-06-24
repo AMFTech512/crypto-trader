@@ -22,8 +22,10 @@ async function init() {
 
   const closeDB = async () => {
     const dbConnection = getConnection();
-    if (dbConnection.isConnected) await dbConnection.close();
-    console.log("Database connection closed.");
+    if (dbConnection.isConnected) {
+      await dbConnection.close();
+      console.log("Database connection closed.");
+    }
   };
 
   const onTerminate = async (signal: string) => {
