@@ -20,19 +20,23 @@ async function init() {
     retryCount: 10,
   });
 
+  const closeDB = async () => {
+    const dbConnection = getConnection();
+    if (dbConnection.isConnected) await dbConnection.close();
+    console.log("Database connection closed.");
+  };
+
   const onTerminate = async (signal: string) => {
     console.log(`Received ${signal}; terminating program...`);
 
     await tickerFetcher.stop();
-
-    const dbConnection = getConnection();
-    dbConnection.close();
-    console.log("Database connection closed.");
+    await closeDB();
   };
 
   process.on("SIGINT", onTerminate);
   process.on("SIGTERM", onTerminate);
 
+  tickerFetcher.onStop(closeDB);
   tickerFetcher.start();
 }
 

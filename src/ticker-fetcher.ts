@@ -27,6 +27,7 @@ export class TickerFetcher {
   retryCount: number = -1;
 
   private _isRunning: boolean = false;
+  private _onStopFuncs: (() => any)[] = [];
 
   constructor(options: TickerFetcherOptions) {
     // initialize properties
@@ -63,7 +64,13 @@ export class TickerFetcher {
       await new Promise((res) => setTimeout(res, 100));
     }
 
+    for (const func of this._onStopFuncs) await func();
+
     console.log("Ticker fetcher gracefully terminated.");
+  }
+
+  onStop(func: () => any) {
+    this._onStopFuncs.push(func);
   }
 
   private async _fetchAndSaveTickers() {
