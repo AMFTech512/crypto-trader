@@ -1,15 +1,36 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+
+type OHLCID = [string, number];
+
+const generateOHLCIDString = ([ticker, time]: OHLCID) => `${ticker}_${time}`;
+const generateOHLCIDArr = (value: string) => {
+  const [ticker, time] = value.split("_");
+  return [ticker, Number(time)];
+};
 
 @Entity()
 export class OHLCRecord {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({
+    type: "varchar",
+    length: 32,
+    transformer: {
+      from: generateOHLCIDArr,
+      to: generateOHLCIDString,
+    },
+  })
+  id: string | OHLCID;
+
+  /** The id but also the time in seconds */
+  @Column()
+  time_seconds: number;
+
+  get time(): Date {
+    // convert it to milliseconds and return a new Date object
+    return new Date(this.time_seconds * 1000);
+  }
 
   @Column()
   ticker: string;
-
-  @Column({ type: "datetime" })
-  time: Date;
 
   @Column({ type: "float" })
   open: number;
@@ -25,6 +46,9 @@ export class OHLCRecord {
 
   @Column({ type: "float" })
   vwap: number;
+
+  @Column({ type: "float" })
+  volume: number;
 
   @Column({ type: "int" })
   count: number;

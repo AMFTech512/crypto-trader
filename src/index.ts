@@ -1,6 +1,7 @@
 import { getConnection } from "typeorm";
 import { initDB } from "./db";
 import { Looper } from "./looper";
+import { buildOHLCFetcher } from "./ohlc-fetcher";
 import { buildTickerFetcher } from "./ticker-fetcher";
 import { USDTickers } from "./tickers/usd-tickers";
 
@@ -9,16 +10,16 @@ console.log("Starting Crypto trader...");
 async function init() {
   await initDB();
 
-  const tickerFetcher = buildTickerFetcher([
+  const tickers = [
     USDTickers.Ethereum,
     USDTickers.EthereumClassic,
     USDTickers.Bitcoin,
     USDTickers.Dogecoin,
     USDTickers.Litecoin,
-  ]);
+  ];
 
   const looper = new Looper({
-    functions: [tickerFetcher],
+    functions: [buildTickerFetcher(tickers), buildOHLCFetcher(tickers)],
     interval: 2000,
     retryCount: 10,
   });

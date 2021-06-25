@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { OHLCRecord } from "../entities/ohlc-history.entity";
 import {
   TickerRecord,
   TickerAskRecord,
@@ -123,4 +124,77 @@ export async function getTicker(ticker: string) {
   tickerRecord.high.last_24_hr = Number(tickerData.h[1]);
 
   return tickerRecord;
+}
+
+export async function getOHLC(
+  ticker: string,
+  interval?: number,
+  since?: number
+) {
+  type OHLCDTO = [
+    number, // time
+    string, // open
+    string, // high
+    string, // low
+    string, // close
+    string, // vwap (volume weighted average price)
+    string, // volume
+    number // count
+  ];
+
+  interface KrakenGetOHLCResponse {
+    error: string[];
+    result: {
+      [key: string]: OHLCDTO[] | number;
+      last: number;
+    };
+  }
+
+  // add any optional parameters
+  const params: any = { pair: ticker };
+  if (interval) params.interval = interval;
+  if (since) params.since = since;
+
+  const [axiosResult, error] = await axiosRequest(
+    axios.get<KrakenGetOHLCResponse>("/public/OHLC", {
+      baseURL,
+      params,
+    })
+  );
+
+  if (error) throw JSON.stringify(error);
+
+  const data = axiosResult.data;
+
+  if (!data?.result) {
+    console.error(`Received empty object for ticker ${ticker}. Skipping...`);
+    return [];
+  }
+
+  const [newKey] = Object.keys(data.result).filter((key) => key !== "last");
+  const ohlcArr = data.result[newKey];
+
+  if (data.error.length > 0) throw data.error;
+
+  const createOHLCRecord = (ohlc: OHLCDTO) => {
+    const record = new OHLCRecord();
+
+    record.ticker = ticker;
+    record.time_seconds = Number(ohlc[0]);
+    record.open = Number(ohlc[1]);
+    record.high = Number(ohlc[2]);
+    record.low = Number(ohlc[3]);
+    record.close = Number(ohlc[4]);
+    record.vwap = Number(ohlc[5]);
+    record.volume = Number(ohlc[6]);
+    record.count = Number(ohlc[7]);
+
+    record.id = [ticker, record.time_seconds];
+
+    return record;
+  };
+
+  const ohlcRecords = (ohlcArr as OHLCDTO[]).map(createOHLCRecord);
+
+  return ohlcRecords;
 }
