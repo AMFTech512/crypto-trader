@@ -1,6 +1,7 @@
 import { getConnection } from "typeorm";
 import { initDB } from "./db";
-import { TickerFetcher } from "./ticker-fetcher";
+import { Looper } from "./looper";
+import { buildTickerFetcher } from "./ticker-fetcher";
 import { USDTickers } from "./tickers/usd-tickers";
 
 console.log("Starting Crypto trader...");
@@ -8,14 +9,16 @@ console.log("Starting Crypto trader...");
 async function init() {
   await initDB();
 
-  const tickerFetcher = new TickerFetcher({
-    tickers: [
-      USDTickers.Ethereum,
-      USDTickers.EthereumClassic,
-      USDTickers.Bitcoin,
-      USDTickers.Dogecoin,
-      USDTickers.Litecoin,
-    ],
+  const tickerFetcher = buildTickerFetcher([
+    USDTickers.Ethereum,
+    USDTickers.EthereumClassic,
+    USDTickers.Bitcoin,
+    USDTickers.Dogecoin,
+    USDTickers.Litecoin,
+  ]);
+
+  const looper = new Looper({
+    functions: [tickerFetcher],
     interval: 2000,
     retryCount: 10,
   });
@@ -31,15 +34,15 @@ async function init() {
   const onTerminate = async (signal: string) => {
     console.log(`Received ${signal}; terminating program...`);
 
-    await tickerFetcher.stop();
+    await looper.stop();
     await closeDB();
   };
 
   process.on("SIGINT", onTerminate);
   process.on("SIGTERM", onTerminate);
 
-  tickerFetcher.onStop(closeDB);
-  tickerFetcher.start();
+  looper.onStop(closeDB);
+  looper.start();
 }
 
 init().catch((error) => {
