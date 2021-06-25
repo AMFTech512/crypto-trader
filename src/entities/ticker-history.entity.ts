@@ -12,13 +12,13 @@ export class TickerAskRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   price: number;
 
   @Column({ type: "int" })
   whole_lot_volume: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   lot_volume: number;
 }
 
@@ -27,13 +27,13 @@ export class TickerBidRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   price: number;
 
   @Column({ type: "int" })
   whole_lot_volume: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   lot_volume: number;
 }
 
@@ -42,10 +42,10 @@ export class TickerLastTradeRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   price: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   lot_volume: number;
 }
 
@@ -54,10 +54,10 @@ export class TickerVolumeRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   today: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   last_24_hr: number;
 }
 
@@ -66,10 +66,10 @@ export class TickerVolumeWeightedAvgPriceRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   today: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   last_24_hr: number;
 }
 
@@ -78,10 +78,10 @@ export class TickerTradeCountRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   today: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   last_24_hr: number;
 }
 
@@ -90,10 +90,10 @@ export class TickerLowRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   today: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   last_24_hr: number;
 }
 
@@ -102,10 +102,10 @@ export class TickerHighRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   today: number;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   last_24_hr: number;
 }
 
@@ -120,7 +120,7 @@ export class TickerRecord {
   @CreateDateColumn()
   time: Date;
 
-  @Column({ type: "double" })
+  @Column({ type: "float" })
   open: number;
 
   @OneToOne(() => TickerAskRecord, { eager: true, cascade: true })
