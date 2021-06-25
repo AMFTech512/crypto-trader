@@ -10,15 +10,19 @@ interface ReadableAxiosError {
 
 export async function axiosRequest<T>(
   req: Promise<AxiosResponse<T>>
-): Promise<[AxiosResponse<T>, ReadableAxiosError]> {
+): Promise<[AxiosResponse<T>, any]> {
   try {
     return [await req, null];
   } catch (error) {
+    if (!error.response)
+      try {
+        return [null, JSON.stringify(error) as any];
+      } catch (jsonerr) {
+        return [null, error];
+      }
+
     const { status, headers, data, statusText, config } =
       error.response as AxiosResponse;
-    return [
-      null,
-      status ? { status, headers, data, statusText, config } : error,
-    ];
+    return [null, { status, headers, data, statusText, config }];
   }
 }
