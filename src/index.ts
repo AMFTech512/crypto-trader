@@ -20,7 +20,7 @@ async function init() {
 
   const looper = new Looper({
     functions: [buildTickerFetcher(tickers), buildOHLCFetcher(tickers)],
-    interval: 2000,
+    interval: 0,
     retryCount: 10,
   });
 

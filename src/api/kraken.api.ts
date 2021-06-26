@@ -12,6 +12,7 @@ import {
   TickerHighRecord,
 } from "../entities/ticker-history.entity";
 import { axiosRequest } from "../helpers/axios-request";
+import { RequestQueue } from "../request-queue";
 
 const baseURL = "https://api.kraken.com/0/";
 
@@ -68,22 +69,24 @@ export async function getTicker(ticker: string) {
     };
   }
 
-  const [axiosResult, error] = await axiosRequest<KrakenGetTickerResponse>(
-    axios.get("/public/Ticker", {
-      baseURL,
-      params: {
-        pair: ticker,
-      },
-    })
+  const [axiosResult, error] = await RequestQueue.queueUp(() =>
+    axiosRequest<KrakenGetTickerResponse>(
+      axios.get("/public/Ticker", {
+        baseURL,
+        params: {
+          pair: ticker,
+        },
+      })
+    )
   );
 
   if (error) throw JSON.stringify(error);
 
   const data = axiosResult.data;
+  if (data.error.length > 0) throw data.error;
+
   const [newKey] = Object.keys(data.result);
   const tickerData = data.result[newKey];
-
-  if (data.error.length > 0) throw data.error;
 
   const tickerRecord = new TickerRecord();
   tickerRecord.ticker = ticker;
@@ -155,26 +158,23 @@ export async function getOHLC(
   if (interval) params.interval = interval;
   if (since) params.since = since;
 
-  const [axiosResult, error] = await axiosRequest(
-    axios.get<KrakenGetOHLCResponse>("/public/OHLC", {
-      baseURL,
-      params,
-    })
+  const [axiosResult, error] = await RequestQueue.queueUp(() =>
+    axiosRequest(
+      axios.get<KrakenGetOHLCResponse>("/public/OHLC", {
+        baseURL,
+        params,
+      })
+    )
   );
 
   if (error) throw JSON.stringify(error);
 
   const data = axiosResult.data;
 
-  if (!data?.result) {
-    console.error(`Received empty object for ticker ${ticker}. Skipping...`);
-    return [];
-  }
+  if (data.error.length > 0) throw data.error;
 
   const [newKey] = Object.keys(data.result).filter((key) => key !== "last");
   const ohlcArr = data.result[newKey];
-
-  if (data.error.length > 0) throw data.error;
 
   const createOHLCRecord = (ohlc: OHLCDTO) => {
     const record = new OHLCRecord();
