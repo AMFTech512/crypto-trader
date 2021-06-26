@@ -5,7 +5,7 @@ interface QueueItem {
 }
 
 export class RequestQueue {
-  public static maxInterval = 350;
+  public static maxInterval = 1000;
 
   private static _queue: QueueItem[] = [];
 
@@ -35,9 +35,11 @@ export class RequestQueue {
 
     while (RequestQueue._queue.length > 0) {
       // ensure a somewhat consistent execution interval
+      // compute when we can execute our next task
       const latestTime = RequestQueue._lastTime + RequestQueue.maxInterval;
+      const now = new Date().getTime();
       // compute the amount of time we have to wait
-      const timeToWait = latestTime - new Date().getTime();
+      const timeToWait = latestTime - now;
       // wait for that long
       await new Promise((res) => setTimeout(res, Math.max(timeToWait, 0)));
       // make a note of when we finished waiting

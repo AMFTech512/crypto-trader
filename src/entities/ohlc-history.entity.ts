@@ -1,9 +1,10 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
-type OHLCID = [string, number];
+export type OHLCID = [string, number];
 
-const generateOHLCIDString = ([ticker, time]: OHLCID) => `${ticker}_${time}`;
-const generateOHLCIDArr = (value: string) => {
+export const generateOHLCIDString = ([ticker, time]: OHLCID) =>
+  `${ticker}_${time}`;
+export const generateOHLCIDArr = (value: string) => {
   const [ticker, time] = value.split("_");
   return [ticker, Number(time)];
 };
