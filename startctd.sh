@@ -1,2 +1,3 @@
 #!/bin/bash
-npm run exec &> output.log &
+node dist &> output.log &
+echo "Executing crypto-trader daemon with pid $!..."
